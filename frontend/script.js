@@ -30,6 +30,9 @@ function setupEventListeners() {
     });
     
     
+    // New chat button
+    document.getElementById('newChatBtn').addEventListener('click', createNewSession);
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -122,10 +125,19 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     let html = `<div class="message-content">${displayContent}</div>`;
     
     if (sources && sources.length > 0) {
+        const renderedSources = sources.map(source => {
+            const pipeIndex = source.indexOf('|');
+            if (pipeIndex !== -1) {
+                const label = source.substring(0, pipeIndex);
+                const url = source.substring(pipeIndex + 1);
+                return `<span class="source-chip"><a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a></span>`;
+            }
+            return `<span class="source-chip">${escapeHtml(source)}</span>`;
+        });
         html += `
             <details class="sources-collapsible">
                 <summary class="sources-header">Sources</summary>
-                <div class="sources-content">${sources.join(', ')}</div>
+                <div class="sources-content">${renderedSources.join('')}</div>
             </details>
         `;
     }
@@ -147,6 +159,13 @@ function escapeHtml(text) {
 // Removed removeMessage function - no longer needed since we handle loading differently
 
 async function createNewSession() {
+    if (currentSessionId) {
+        try {
+            await fetch(`${API_URL}/session/${currentSessionId}`, { method: 'DELETE' });
+        } catch (e) {
+            // best-effort cleanup — ignore errors
+        }
+    }
     currentSessionId = null;
     chatMessages.innerHTML = '';
     addMessage('Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?', 'assistant', null, true);
