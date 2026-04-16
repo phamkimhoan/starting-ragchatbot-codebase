@@ -7,8 +7,32 @@ let currentSessionId = null;
 // DOM elements
 let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
 
+// ─── Theme Toggle ────────────────────────────────────────────────────────────
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        updateToggleLabel(true);
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateToggleLabel(isLight);
+}
+
+function updateToggleLabel(isLight) {
+    const btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    btn.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Apply saved theme before rendering to avoid flash
+    initTheme();
+
     // Get DOM elements after page loads
     chatMessages = document.getElementById('chatMessages');
     chatInput = document.getElementById('chatInput');
@@ -33,6 +57,9 @@ function setupEventListeners() {
 
     // New chat button
     document.getElementById('newChatBtn').addEventListener('click', createNewSession);
+
+    // Theme toggle button
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach((button) => {

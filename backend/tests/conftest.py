@@ -136,3 +136,39 @@ def sample_chunk():
         lesson_number=1,
         chunk_index=0,
     )
+
+
+@pytest.fixture
+def sample_course_no_optionals():
+    """A Course where instructor and course_link are None."""
+    return Course(
+        title="Sparse Course",
+        course_link=None,
+        instructor=None,
+        lessons=[],
+    )
+
+
+@pytest.fixture
+def sample_chunks():
+    """A list of CourseChunks including one with lesson_number=None."""
+    return [
+        CourseChunk(content="chunk 0 text", course_title="Python Basics", lesson_number=1, chunk_index=0),
+        CourseChunk(content="chunk 1 text", course_title="Python Basics", lesson_number=2, chunk_index=1),
+        CourseChunk(content="chunk 2 no lesson", course_title="Python Basics", lesson_number=None, chunk_index=2),
+    ]
+
+
+@pytest.fixture
+def mock_vector_store():
+    """A MagicMock that mimics VectorStore's public interface."""
+    store = MagicMock()
+    store.search.return_value = MagicMock(
+        documents=["result doc"],
+        metadata=[{"course_title": "Python Basics", "lesson_number": 1}],
+        distances=[0.1],
+        error=None,
+        is_empty=MagicMock(return_value=False),
+    )
+    store.get_lesson_link.return_value = "https://example.com/python/1"
+    return store
